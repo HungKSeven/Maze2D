@@ -23,6 +23,8 @@ public class ContentControl : MonoBehaviour
 
     public GameObject Canvas;
 
+    public GameObject Pool;
+
     DataProcessing DtP;
     Quaternion rot = new Quaternion(0f, 0f, 0f, 0f);
 
@@ -59,12 +61,12 @@ public class ContentControl : MonoBehaviour
         {
             this.transform.localPosition = new Vector3(0f, 0f, 0f);
         }
-        if (this.transform.localPosition.y < -73285)
+        if (this.transform.localPosition.y < -73700)
         {
-            this.transform.localPosition = new Vector3(0f, -73285f, 0f);
+            this.transform.localPosition = new Vector3(0f, -73700f, 0f);
         }
 
-        CreateAndDelRow();
+        LoadRow();
         ShowNotiLoading();
         //Debug.Log(Time.deltaTime);
         if (Input.touchCount > 0)
@@ -109,7 +111,7 @@ public class ContentControl : MonoBehaviour
     {
         DtP.RandomStart();
         DtP.LoadGame();
-        DtP.isNewGame=false;
+        DtP.isNewGame = false;
         this.transform.localPosition = new Vector3(0f, DtP.yScrollMap, 0f);
         DtP.SaveGame();
         numStars.transform.Find("Text").GetComponent<Text>().text = DtP.numStars.ToString();
@@ -144,68 +146,100 @@ public class ContentControl : MonoBehaviour
 
     void SetUpRow(GameObject Row)
     {
-        int cMax;
+        int ColumnMax;
         if (Row.GetComponent<rowContentControl>().numRow == 249)
         {
-            cMax = 3;
+            ColumnMax = 3;
         }
         else
         {
-            cMax = 4;
+            ColumnMax = 4;
         }
-        for (int c = 0; c < cMax; c++)
+        for (int numColumn = 0; numColumn < ColumnMax; numColumn++)
         {
-            GameObject lvButtonProcessing = Row.transform.Find("LvButtons").GetChild(c).gameObject;
-            lvButtonProcessing.GetComponent<LvButton>().level = Row.GetComponent<rowContentControl>().numRow * 4 + c + 1;
-            if (lvButtonProcessing.GetComponent<LvButton>().level != 1)
-            {
-                if (lvButtonProcessing.GetComponent<LvButton>().level <= (int)DtP.lvReached)
-                {
-                    lvButtonProcessing.GetComponent<LvButton>().isUnlocked = true;
-                    lvButtonProcessing.transform.GetChild(0).Find("LvText").gameObject.GetComponent<Text>().text = lvButtonProcessing.GetComponent<LvButton>().level.ToString();
-                    lvButtonProcessing.transform.GetChild(0).gameObject.SetActive(true);
-                    lvButtonProcessing.transform.GetChild(0).Find("imgTutorial").gameObject.SetActive(false);
-                    lvButtonProcessing.transform.GetChild(1).gameObject.SetActive(false);
-                    for (byte nStar = 0; nStar < DtP.lvStars[lvButtonProcessing.GetComponent<LvButton>().level - 1]; nStar++)
-                    {
-                        lvButtonProcessing.transform.GetChild(0).Find("Rate").GetChild(nStar).gameObject.SetActive(true);
-                    }
-
-                }
-                else
-                {
-                    lvButtonProcessing.GetComponent<LvButton>().isUnlocked = false;
-                    lvButtonProcessing.transform.GetChild(1).Find("LvText").gameObject.GetComponent<Text>().text = lvButtonProcessing.GetComponent<LvButton>().level.ToString();
-                    lvButtonProcessing.transform.GetChild(1).gameObject.SetActive(true);
-                    lvButtonProcessing.transform.GetChild(0).gameObject.SetActive(false);
-
-                }
-            }
-            else
-            {
-                lvButtonProcessing.GetComponent<LvButton>().isUnlocked = true;
-                lvButtonProcessing.transform.GetChild(0).Find("LvText").gameObject.SetActive(false);
-                lvButtonProcessing.transform.GetChild(0).gameObject.SetActive(true);
-                lvButtonProcessing.transform.GetChild(1).gameObject.SetActive(false);
-                for (byte nStar = 0; nStar < DtP.lvStars[0]; nStar++)
-                {
-                    lvButtonProcessing.transform.GetChild(0).Find("Rate").GetChild(nStar).gameObject.SetActive(true);
-                }
-            }
+            GameObject lvButtonProcessing = Row.transform.Find("LvButtons").GetChild(numColumn).gameObject;
+            SetUpLvButtonLv(lvButtonProcessing, Row, numColumn);
+            SetUpLvButtonLvText(lvButtonProcessing);
+            SetUpLvButtonLvRate(lvButtonProcessing);
+            SetUpLvButtonLvStatus(lvButtonProcessing);
 
         }
     }
 
-    void CreateAndDelRow()
+    void SetUpLvButtonLv(GameObject LvButtonProcessing, GameObject Row, int column)
+    {
+        LvButtonProcessing.GetComponent<LvButton>().level = Row.GetComponent<rowContentControl>().numRow * 4 + column + 1;
+    }
+
+    void SetUpLvButtonLvText(GameObject LvButtonProcessing)
+    {
+        if (LvButtonProcessing.GetComponent<LvButton>().level != 1)
+        {
+            LvButtonProcessing.transform.GetChild(0).Find("LvText").gameObject.GetComponent<Text>().text = LvButtonProcessing.GetComponent<LvButton>().level.ToString();
+            LvButtonProcessing.transform.GetChild(0).Find("LvText").gameObject.SetActive(true);
+        }
+        else
+        {
+            LvButtonProcessing.transform.GetChild(0).Find("LvText").gameObject.SetActive(false);
+        }
+    }
+
+    void SetUpLvButtonLvRate(GameObject LvButtonProcessing)
+    {
+        //reset rate
+        for (byte nStar = 0; nStar < 3; nStar++)
+        {
+            LvButtonProcessing.transform.GetChild(0).Find("Rate").GetChild(nStar).gameObject.SetActive(false);
+        }
+
+        //set new rate
+        for (byte nStar = 0; nStar < DtP.lvStars[LvButtonProcessing.GetComponent<LvButton>().level - 1]; nStar++)
+        {
+            LvButtonProcessing.transform.GetChild(0).Find("Rate").GetChild(nStar).gameObject.SetActive(true);
+        }
+    }
+
+    void SetUpLvButtonLvStatus(GameObject LvButtonProcessing)
+    {
+        // set up unlocked and locked button
+        if (LvButtonProcessing.GetComponent<LvButton>().level <= (int)DtP.lvReached)
+        {
+            LvButtonProcessing.GetComponent<LvButton>().isUnlocked = true;
+            LvButtonProcessing.transform.GetChild(0).gameObject.SetActive(true);
+            LvButtonProcessing.transform.GetChild(1).gameObject.SetActive(false);
+        }
+        else
+        {
+            LvButtonProcessing.GetComponent<LvButton>().isUnlocked = false;
+            LvButtonProcessing.transform.GetChild(1).gameObject.SetActive(true);
+            LvButtonProcessing.transform.GetChild(0).gameObject.SetActive(false);
+
+        }
+
+        // show image tutorial
+        if (LvButtonProcessing.GetComponent<LvButton>().level == 1)
+        {
+            LvButtonProcessing.transform.GetChild(0).Find("imgTutorial").gameObject.SetActive(true);
+        }
+        else
+        {
+            LvButtonProcessing.transform.GetChild(0).Find("imgTutorial").gameObject.SetActive(false);
+        }
+    }
+
+
+    void LoadRow()
     {
         GameObject rowObjectZero;
         GameObject rowObjectLast;
         GameObject newRow;
         Vector3 posNewRow;
-        rowObjectZero = this.transform.GetChild(0).gameObject;
-        rowObjectLast = this.transform.GetChild(this.transform.childCount - 1).gameObject;
         Vector3 dRow;
         float dOut;
+
+        rowObjectZero = this.transform.GetChild(0).gameObject;
+        rowObjectLast = this.transform.GetChild(this.transform.childCount - 1).gameObject;
+
         if (Screen.height / Screen.width < 2)
         {
             dRow = new Vector3(0f, 300f, 0f);
@@ -216,46 +250,52 @@ public class ContentControl : MonoBehaviour
             dRow = new Vector3(0f, 200f, 0f);
             dOut = 200f;
         }
+
+        // scroll down
         if (rowObjectZero.transform.position.y < -dOut)
         {
-
-            posNewRow = rowObjectLast.transform.position + dRow;
-            if (rowObjectLast.GetComponent<rowContentControl>().kindRow == 0)
+            if (rowObjectLast.GetComponent<rowContentControl>().numRow != 249)
             {
-                if (rowObjectLast.GetComponent<rowContentControl>().numRow != 248)
+                posNewRow = rowObjectLast.transform.position + dRow;
+                if (rowObjectLast.GetComponent<rowContentControl>().kindRow == 0)
                 {
-                    newRow = Instantiate(rowOddContentPf, posNewRow, rot, this.transform);
+                    if (rowObjectLast.GetComponent<rowContentControl>().numRow != 248)
+                    {
+                        newRow = GetRowFromPool("Odd", posNewRow);
+                    }
+                    else
+                    {
+                        newRow = GetRowFromPool("Last", posNewRow);
+                    }
                 }
                 else
                 {
-                    newRow = Instantiate(rowLast, posNewRow, rot, this.transform);
+
+                    newRow = GetRowFromPool("Even", posNewRow);
                 }
-            }
-            else
-            {
-                newRow = Instantiate(rowEvenContentPf, posNewRow, rot, this.transform);
+
+                if (newRow != null)
+                {
+                    newRow.GetComponent<rowContentControl>().numRow = rowObjectLast.GetComponent<rowContentControl>().numRow + 1;
+                }
+                PutRowToPool(rowObjectZero);
+                SetUpRow(newRow);
             }
 
-            if (newRow != null)
-            {
-                newRow.GetComponent<rowContentControl>().numRow = rowObjectLast.GetComponent<rowContentControl>().numRow + 1;
-            }
 
-            Destroy(rowObjectZero);
-            SetUpRow(newRow);
         }
-        rowObjectZero = this.transform.GetChild(0).gameObject;
-        rowObjectLast = this.transform.GetChild(this.transform.childCount - 1).gameObject;
+
+        //scroll up
         if (rowObjectLast.transform.position.y > dOut + Screen.height & rowObjectZero.GetComponent<rowContentControl>().numRow != 0)
         {
             posNewRow = rowObjectZero.transform.position - dRow;
             if (rowObjectZero.GetComponent<rowContentControl>().kindRow == 0)
             {
-                newRow = Instantiate(rowOddContentPf, posNewRow, rot, this.transform);
+                newRow = GetRowFromPool("Odd", posNewRow);
             }
             else
             {
-                newRow = Instantiate(rowEvenContentPf, posNewRow, rot, this.transform);
+                newRow = GetRowFromPool("Even", posNewRow);
             }
             if (newRow != null)
             {
@@ -264,10 +304,48 @@ public class ContentControl : MonoBehaviour
 
             }
 
-            Destroy(rowObjectLast);
+            PutRowToPool(rowObjectLast);
             SetUpRow(newRow);
         }
     }
 
+
+
+    void PutRowToPool(GameObject RowToPool)
+    {
+        if (RowToPool.GetComponent<rowContentControl>().numRow == 249)
+        {
+            RowToPool.transform.SetParent(Pool.transform.Find("Last"));
+        }
+        else
+        {
+            switch (RowToPool.GetComponent<rowContentControl>().kindRow)
+            {
+                case 0:
+                    RowToPool.transform.SetParent(Pool.transform.Find("Even"));
+                    break;
+                case 1:
+                    RowToPool.transform.SetParent(Pool.transform.Find("Odd"));
+                    break;
+                default:
+                    Debug.Log("kindRow error");
+                    break;
+            }
+        }
+
+    }
+
+    GameObject GetRowFromPool(string keyRow, Vector3 RowPosition)
+    {
+        // kindRow = 0 la last row
+        // kindRow = 1 la row le
+        // kindRow = 2 la row chan
+        GameObject RowFromPool;
+        RowFromPool = Pool.transform.Find(keyRow).GetChild(0).gameObject;
+        RowFromPool.transform.SetParent(this.transform);
+        RowFromPool.transform.position = RowPosition;
+        RowFromPool.transform.SetAsLastSibling();
+        return RowFromPool;
+    }
 
 }

@@ -350,6 +350,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: LvButton
       objectReference: {fileID: 0}
+    - target: {fileID: 4706476085453464432, guid: 37b0a1151a504954ead137978b513389, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706476085842887536, guid: 37b0a1151a504954ead137978b513389, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4706476085852790318, guid: 37b0a1151a504954ead137978b513389, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 37b0a1151a504954ead137978b513389, type: 3}
 --- !u!224 &7570439443408437492 stripped
