@@ -67,7 +67,7 @@ public class ManagerMaze : MonoBehaviour
 
     public GameObject RateCurrent;
 
-
+    //test pull git in github
     // Start is called before the first frame update
     void Start()
     {
