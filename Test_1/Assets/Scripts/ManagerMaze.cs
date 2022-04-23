@@ -65,6 +65,8 @@ public class ManagerMaze : MonoBehaviour
 
     DataProcessing DtP;
 
+    public GameObject RateCurrent;
+
 
     // Start is called before the first frame update
     void Start()
@@ -867,6 +869,26 @@ public class ManagerMaze : MonoBehaviour
         }
     }
 
+    void ProcessRateCurrent(float timeRemaining)
+    {
+        bool Rating2Star= timeRemaining < 0.72f;
+        bool Rating1Star= timeRemaining < 0.44f;
+        bool Rating0Star= timeRemaining < 0.17f;
+        if (Rating2Star)
+        {
+            RateCurrent.transform.GetChild(5).gameObject.SetActive(false);
+        }
+        if (Rating1Star)
+        {
+            RateCurrent.transform.GetChild(4).gameObject.SetActive(false);
+        }
+        if (Rating0Star)
+        {
+            RateCurrent.transform.GetChild(3).gameObject.SetActive(false);
+        }
+
+    }
+
     public void showHint()
     {
         if (DtP.numHint > 0 & !isAutoMoving)
@@ -938,14 +960,15 @@ public class ManagerMaze : MonoBehaviour
         if (!isWin & !isAutoMoving)
         {
             Move();
-            if(time<180f)
+            if(time<120f)
             {
                 time+=Time.deltaTime;
-                Canvas.transform.Find("Header").Find("Timer").gameObject.GetComponent<Slider>().value=1f-time/180;
+                float timeRemaining = 1f-time/120f;
+                Canvas.transform.Find("Header").Find("Timer").gameObject.GetComponent<Slider>().value=timeRemaining;
+                ProcessRateCurrent(timeRemaining);
             } 
         }
         AutoMoveToGate();
-
         CheckWin();
 
     }
